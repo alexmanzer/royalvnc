@@ -96,10 +96,10 @@ public final class VNCConnection: NSObjectOrAnyObject {
 		let rawEncoding = VNCProtocol.RawEncoding()
 		let hextileEncoding = VNCProtocol.HextileEncoding(rawEncoding: rawEncoding)
 
-		let compressionLevelEncodingType = VNCPseudoEncodingType.compressionLevel6.rawValue
+		let compressionLevelEncodingType = compressionLevelPseudoEncodingType.rawValue
 		let compressionLevelEncoding = VNCProtocol.CompressionLevelEncoding(encodingType: compressionLevelEncodingType)
 
-		let jpegQualityLevelEncodingType = VNCPseudoEncodingType.jpegQualityLevel6.rawValue
+		let jpegQualityLevelEncodingType = jpegQualityLevelPseudoEncodingType.rawValue
 		let jpegQualityLevelEncoding = VNCProtocol.JPEGQualityLevelEncoding(encodingType: jpegQualityLevelEncodingType)
 
 		let encs: Encodings = [
@@ -136,6 +136,17 @@ public final class VNCConnection: NSObjectOrAnyObject {
 
 		return encs
 	}()
+
+	/// Pseudo encoding for the configured Tight compression level (levels 1–9 map to -256…-248).
+	var compressionLevelPseudoEncodingType: VNCPseudoEncodingType {
+		VNCPseudoEncodingType(rawValue: -257 + Int32(settings.tightCompressionLevel)) ?? .compressionLevel6
+	}
+
+	/// Pseudo encoding for the configured JPEG quality (levels 0–9 map to -32…-23).
+	var jpegQualityLevelPseudoEncodingType: VNCPseudoEncodingType {
+		guard let level = settings.tightJPEGQualityLevel else { return .jpegQualityLevel6 }
+		return VNCPseudoEncodingType(rawValue: -32 + Int32(level)) ?? .jpegQualityLevel6
+	}
 
 	func orderedEncodingTypes() throws -> [VNCEncodingType] {
 		// Frame Encodings (Required)
@@ -177,13 +188,11 @@ public final class VNCConnection: NSObjectOrAnyObject {
 			// TODO: Implement
 //			VNCPseudoEncodingType.extendedClipboard.rawValue,
             
-            // TODO: Make configurable
-			VNCPseudoEncodingType.compressionLevel6.rawValue
+			compressionLevelPseudoEncodingType.rawValue
 		])
 
-		if usesTightEncoding {
-            // TODO: Make configurable
-			encs.append(VNCPseudoEncodingType.jpegQualityLevel6.rawValue)
+		if usesTightEncoding, settings.tightJPEGQualityLevel != nil {
+			encs.append(jpegQualityLevelPseudoEncodingType.rawValue)
 		}
 
 		let uniqueEncs = encs.uniqued()

@@ -56,6 +56,12 @@ public extension VNCConnection {
 
 		public let frameEncodings: [VNCFrameEncodingType]
 
+		/// Tight compression level requested from the server (1 = fastest, 9 = smallest).
+		public let tightCompressionLevel: UInt8
+
+		/// Tight JPEG quality requested from the server (0 = smallest, 9 = best); nil disables lossy JPEG.
+		public let tightJPEGQualityLevel: UInt8?
+
 #if canImport(ObjectiveC)
 		@objc(frameEncodings)
 #endif
@@ -73,6 +79,34 @@ public extension VNCConnection {
 					isClipboardRedirectionEnabled: Bool,
 					colorDepth: ColorDepth,
 					frameEncodings: [VNCFrameEncodingType]) {
+			self.init(isDebugLoggingEnabled: isDebugLoggingEnabled,
+					  hostname: hostname,
+					  port: port,
+					  isShared: isShared,
+					  isScalingEnabled: isScalingEnabled,
+					  useDisplayLink: useDisplayLink,
+					  inputMode: inputMode,
+					  isClipboardRedirectionEnabled: isClipboardRedirectionEnabled,
+					  colorDepth: colorDepth,
+					  frameEncodings: frameEncodings,
+					  tightCompressionLevel: 6,
+					  tightJPEGQualityLevel: 6)
+		}
+
+		public init(isDebugLoggingEnabled: Bool,
+					hostname: String,
+					port: UInt16,
+					isShared: Bool,
+					isScalingEnabled: Bool,
+					useDisplayLink: Bool,
+					inputMode: InputMode,
+					isClipboardRedirectionEnabled: Bool,
+					colorDepth: ColorDepth,
+					frameEncodings: [VNCFrameEncodingType],
+					tightCompressionLevel: UInt8,
+					tightJPEGQualityLevel: UInt8?) {
+			self.tightCompressionLevel = min(max(tightCompressionLevel, 1), 9)
+			self.tightJPEGQualityLevel = tightJPEGQualityLevel.map { min($0, 9) }
 			self.isDebugLoggingEnabled = isDebugLoggingEnabled
 
 			self.hostname = hostname
