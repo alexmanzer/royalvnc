@@ -69,7 +69,7 @@ public extension VNCConnection {
 			frameEncodings.map({ $0.rawValue.rawValue })
 		}
 
-		public init(isDebugLoggingEnabled: Bool,
+		public convenience init(isDebugLoggingEnabled: Bool,
 					hostname: String,
 					port: UInt16,
 					isShared: Bool,
