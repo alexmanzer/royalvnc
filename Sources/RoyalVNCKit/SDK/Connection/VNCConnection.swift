@@ -44,6 +44,9 @@ public final class VNCConnection: NSObjectOrAnyObject {
     
     public let framebufferAllocator: VNCFramebufferAllocator?
 
+    /// Bytes sent and received on this connection, counted at the socket.
+    public let statistics = VNCConnectionStatistics()
+
 	// MARK: - Private Properties
 	private let queue = DispatchQueue(label: "com.royalapps.royalvnc.connectionqueue",
 									  attributes: .concurrent)
@@ -77,9 +80,11 @@ public final class VNCConnection: NSObjectOrAnyObject {
 
         // NOTE: To test SocketNetworkConnection on Darwin (macOS, iOS, etc.), comment out the the #if
 #if canImport(Network)
-        let connection = NWConnection(settings: connectionSettings)
+        let connection = CountingNetworkConnection(inner: NWConnection(settings: connectionSettings),
+                                                   statistics: statistics)
 #else
-		let connection = SocketNetworkConnection(settings: connectionSettings)
+        let connection = CountingNetworkConnection(inner: SocketNetworkConnection(settings: connectionSettings),
+                                                   statistics: statistics)
 #endif
 
         connection.setStatusUpdateHandler(connectionStatusDidChange)
