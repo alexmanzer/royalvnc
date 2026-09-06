@@ -139,13 +139,15 @@ public final class VNCConnection: NSObjectOrAnyObject {
 
 	/// Pseudo encoding for the configured Tight compression level (levels 1–9 map to -256…-248).
 	var compressionLevelPseudoEncodingType: VNCPseudoEncodingType {
-		VNCPseudoEncodingType(rawValue: VNCEncodingType(rawValue: -257 + Int32(settings.tightCompressionLevel))) ?? .compressionLevel6
+		let raw = Int64(-257) + Int64(settings.tightCompressionLevel)
+		return VNCEncodingType(rawValue: raw).flatMap(VNCPseudoEncodingType.init(rawValue:)) ?? .compressionLevel6
 	}
 
 	/// Pseudo encoding for the configured JPEG quality (levels 0–9 map to -32…-23).
 	var jpegQualityLevelPseudoEncodingType: VNCPseudoEncodingType {
 		guard let level = settings.tightJPEGQualityLevel else { return .jpegQualityLevel6 }
-		return VNCPseudoEncodingType(rawValue: VNCEncodingType(rawValue: -32 + Int32(level))) ?? .jpegQualityLevel6
+		let raw = Int64(-32) + Int64(level)
+		return VNCEncodingType(rawValue: raw).flatMap(VNCPseudoEncodingType.init(rawValue:)) ?? .jpegQualityLevel6
 	}
 
 	func orderedEncodingTypes() throws -> [VNCEncodingType] {
